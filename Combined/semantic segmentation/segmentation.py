@@ -12,7 +12,7 @@ from torch.nn.utils.fusion import fuse_conv_bn_eval
 
 MEAN_RGB = (0.3257, 0.3690, 0.3223)
 STD_RGB = (0.2112, 0.2148, 0.2115)
-CLASS_COLORS_BGR = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 255, 255]], np.uint8)
+CLASS_COLORS_BGR = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [5, 54, 244]], np.uint8)
 AUXILIARY_PREFIXES = ("aux2.", "aux3.", "aux4.", "aux5_4.")
 
 
