@@ -1,0 +1,17 @@
+{
+  "frames": 60,
+  "elapsed_s": 4.512324293000347,
+  "processing_fps": 13.29691664516972,
+  "position": [
+    3.184647429706369,
+    -0.03583263786684617,
+    9.799593109273353
+  ],
+  "distance": 15.322647844690284,
+  "units": "relative units",
+  "scale_restarts": 1,
+  "vo_status": "TRACKING PNP",
+  "calibrated": false,
+  "floor_fraction": 0.45,
+  "device": "cpu"
+}

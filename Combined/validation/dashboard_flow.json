@@ -1,0 +1,9 @@
+{
+  "no_tracking_before_browser": true,
+  "browser_starts_tracking": true,
+  "all_four_mjpeg_views": true,
+  "upload_resets_pose_and_disables_motors": true,
+  "video_eof_keeps_dashboard_online": true,
+  "reset_replays_video": true,
+  "return_to_configured_source": true
+}

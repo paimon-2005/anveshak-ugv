@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d0f">
+  <title>ANVESHAK Rover Control</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true">A</div>
+      <div>
+        <p class="eyebrow">UGV COMMAND SYSTEM</p>
+        <h1>ANVESHAK <span>/ Rover 01</span></h1>
+      </div>
+    </div>
+
+    <div class="topbar-status">
+      <div class="status-pill" id="cameraStatus">
+        <span class="status-dot"></span>
+        <span>Camera offline</span>
+      </div>
+      <div class="status-pill" id="controllerStatus">
+        <span class="status-dot"></span>
+        <span>Drive link idle</span>
+      </div>
+      <time id="missionClock">00:00:00</time>
+    </div>
+  </header>
+
+  <main>
+    <section class="mission-strip" aria-label="Mission status">
+      <div>
+        <span>CONTROL MODE</span>
+        <strong id="modeReadout">MANUAL OVERRIDE</strong>
+      </div>
+      <div>
+        <span>A* PLANNER</span>
+        <strong id="plannerReadout">WAITING</strong>
+      </div>
+      <div>
+        <span>ACTIVE COMMAND</span>
+        <strong id="commandReadout">STOP</strong>
+      </div>
+      <div>
+        <span>PATH NODES</span>
+        <strong id="pathReadout">0</strong>
+      </div>
+    </section>
+
+    <div class="dashboard-grid">
+      <section class="panel video-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">PERCEPTION PIPELINE</p>
+            <h2>Live navigation view</h2>
+          </div>
+          <div class="live-chip"><span></span> LIVE</div>
+        </div>
+
+        <div class="view-toolbar" role="group" aria-label="Display pipeline">
+          <button type="button" data-view="all" class="active">All views</button>
+          <button type="button" data-view="vo">Only VO</button>
+          <button type="button" data-view="segmentation">Only Segmentation</button>
+          <button type="button" data-view="astar">Only A*</button>
+        </div>
+        <div class="view-toolbar">
+          <button type="button" id="uploadVideo">Upload test video</button>
+          <input id="videoFile" type="file" accept=".mp4,.avi,.mov,.mkv,.webm,.m4v" hidden>
+          <button type="button" id="liveCamera">Return to camera</button>
+          <button type="button" id="resetVO">Reset VO</button>
+          <span id="videoUploadStatus" role="status">Camera source</span>
+        </div>
+        <div class="video-stage">
+          <img id="roverStream" src="/stream.mjpg?view=all" alt="Processed rover camera stream with semantic segmentation and A-star path">
+          <div class="video-corner top-left"></div>
+          <div class="video-corner top-right"></div>
+          <div class="video-corner bottom-left"></div>
+          <div class="video-corner bottom-right"></div>
+          
+          <div class="video-overlay fps-label"><span id="fpsReadout">0.0</span> FPS</div>
+        </div>
+
+        <div class="legend" aria-label="Navigation legend">
+          <span><i class="legend-line route"></i>A* route</span>
+          <span><i class="legend-dot rover"></i>Rover</span>
+          <span><i class="legend-dot goal"></i>Goal</span>
+          <span><i class="legend-block traversable"></i>Traversable</span>
+        </div>
+      </section>
+
+      <aside class="controls-column">
+        <section class="panel control-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">DRIVE AUTHORITY</p>
+              <h2>Rover controls</h2>
+            </div>
+            <span class="authority-badge" id="authorityBadge">MANUAL</span>
+          </div>
+
+          <div class="mode-switch" role="group" aria-label="Control mode">
+            <button type="button" data-mode="manual" class="active">Manual</button>
+            <button type="button" data-mode="auto">Autonomous</button>
+          </div>
+
+          <p class="control-note" id="controlNote">
+            Manual commands override A* drive output. Release a control to stop.
+          </p>
+
+          <div class="drive-pad" aria-label="Directional drive controls">
+            <button type="button" class="drive-button forward" data-command="forward" aria-label="Drive forward">
+              <span class="arrow">↑</span><small>W</small>
+            </button>
+            <button type="button" class="drive-button left" data-command="left" aria-label="Turn left">
+              <span class="arrow">←</span><small>A</small>
+            </button>
+            <button type="button" class="drive-button stop" data-command="stop" aria-label="Stop rover">
+              <span class="stop-square"></span><small>STOP</small>
+            </button>
+            <button type="button" class="drive-button right" data-command="right" aria-label="Turn right">
+              <span class="arrow">→</span><small>D</small>
+            </button>
+            <button type="button" class="drive-button backward" data-command="backward" aria-label="Drive backward">
+              <span class="arrow">↓</span><small>S</small>
+            </button>
+          </div>
+
+          <div class="speed-control">
+            <div class="speed-label">
+              <label for="speedRange">Drive speed</label>
+              <output id="speedValue">55%</output>
+            </div>
+            <input id="speedRange" type="range" min="15" max="100" value="55" step="5">
+            <div class="range-labels"><span>Precision</span><span>Maximum</span></div>
+          </div>
+
+          <button type="button" class="emergency-button" id="emergencyButton">
+            <span class="emergency-icon">!</span>
+            <span><strong>Emergency stop</strong><small>Immediately halt and lock manual mode</small></span>
+          </button>
+        </section>
+
+        <section class="panel telemetry-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">VISUAL ODOMETRY</p>
+              <h2>Live telemetry</h2>
+            </div>
+          </div>
+          <div class="telemetry-grid">
+            <div><span>X POSITION</span><strong id="positionX">0.00</strong><small class="position-unit">relative units</small></div>
+            <div><span>Y POSITION</span><strong id="positionY">0.00</strong><small class="position-unit">relative units</small></div>
+            <div><span>Z POSITION</span><strong id="positionZ">0.00</strong><small class="position-unit">relative units</small></div>
+            <div><span>VO FEATURES</span><strong id="featuresReadout">0</strong><small id="inliersReadout">0 inliers</small></div>
+          </div>
+          <p class="control-note" id="voStatus">Initializing visual odometry</p>
+          <p class="control-note" id="perceptionAge">Waiting for perception</p>
+          <p class="control-note" id="floorOverride">Sky override: bottom 45%</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
