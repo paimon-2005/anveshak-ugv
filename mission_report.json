@@ -1,0 +1,18 @@
+{
+  "pose_x": 0.0,
+  "pose_y": 0.0,
+  "yaw_deg": 0.0,
+  "vo_ok": false,
+  "waypoint": "0/0",
+  "mission_done": false,
+  "coverage_m2": 3.2,
+  "segments": [],
+  "route": [],
+  "trail": [
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "survivors": []
+}

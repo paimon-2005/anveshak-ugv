@@ -1,0 +1,33 @@
+{
+  "torch": "2.14.0+cpu",
+  "opencv": "5.0.0",
+  "resolution": [
+    640,
+    480
+  ],
+  "cpu_threads": 2,
+  "original_parameters": 9927792,
+  "inference_parameters": 3593016,
+  "comparisons": [
+    {
+      "frame": 0,
+      "class_agreement": 1.0,
+      "max_abs_logit_error": 5.9604644775390625e-06
+    },
+    {
+      "frame": 120,
+      "class_agreement": 1.0,
+      "max_abs_logit_error": 7.152557373046875e-06
+    },
+    {
+      "frame": 600,
+      "class_agreement": 1.0,
+      "max_abs_logit_error": 7.152557373046875e-06
+    }
+  ],
+  "timings": {
+    "original_median_ms": 285.78849699988496,
+    "optimized_median_ms": 175.402818999828
+  },
+  "speedup_this_environment": 1.629326704265598
+}

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10172b">
+  <title>ANVESHAK — Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/styles.css?v=11">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">AR</div><div><strong>ANVESHAK</strong><span>MISSION CONTROL</span></div></div>
+    <div class="top-status">
+      <span class="connected"><i></i><b id="vehicleStatus">ANV-01 OFFLINE</b></span>
+      <span class="mission-time">MISSION <b id="missionClock">00:00:00</b></span>
+      <button id="emergencyButton" class="emergency-top">● EMERGENCY STOP</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <nav>
+      <button class="nav-item active" data-page="dashboard"><span class="nav-icon">D</span>Dashboard</button>
+      <button class="nav-item" data-page="map"><span class="nav-icon">M</span>Local Map</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="sidebar-label">AUTONOMOUS SYSTEM</div><div class="side-health"><i></i><span id="sideHealth">Waiting for camera</span></div></div>
+  </aside>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-head">
+        <div><h1>Mission Dashboard</h1><p>Real-time autonomous rover monitoring, perception and path planning</p></div>
+        <div class="head-actions"><span class="status-pill"><i></i> LIVE MONITOR</span><button id="openVO" class="vo-launch"><span>↗</span> Open Visual Odometry</button></div>
+      </div>
+
+      <div class="metric-row">
+        <article class="metric-card"><span>CAMERA</span><strong id="dashCamera">OFFLINE</strong><small id="dashFps">0.0 FPS</small></article>
+        <article class="metric-card"><span>SEGMENTATION</span><strong id="dashPlanner">WAITING</strong><small id="dashPath">0 path nodes</small></article>
+        <article class="metric-card"><span>HUMAN DETECTION</span><strong id="dashHuman">CLEAR</strong><small id="dashHumanMeta">0 people · --</small></article>
+        <article class="metric-card"><span>A* COMMAND</span><strong id="dashCommand">STOP</strong><small id="dashCommandMeta">Planner waiting</small></article>
+      </div>
+
+      <article class="panel source-panel">
+        <div><span class="overline">VIDEO SOURCE</span><h2 id="sourceName">Live camera</h2><p id="sourceDetail">Live camera input</p></div>
+        <div class="source-actions"><input id="videoInput" type="file" accept=".mp4,.avi,.mov,.mkv,.webm,.m4v,video/*" hidden><button class="source-primary" id="addVideo">＋ Add Test Video</button><button class="source-secondary" id="useLive">Use Live Camera</button></div>
+      </article>
+
+      <div class="monitor-grid">
+        <article class="panel monitor-card">
+          <div class="panel-head"><div><span class="overline">CAMERA 01</span><h2>Live View</h2></div><span class="live-badge"><i></i> RAW</span></div>
+          <div class="camera-wrap monitor-image"><img id="dashRawStream" src="/stream.mjpg?view=raw" alt="Live raw camera"><span class="camera-tag top-left">LIVE · CAM 01</span><span class="camera-tag top-right" id="rawResolution">RAW</span></div>
+        </article>
+        <article class="panel monitor-card">
+          <div class="panel-head"><div><span class="overline">CAMERA 01</span><h2>Semantic Segmentation</h2></div><span class="status-pill small"><i></i> SEMANTIC</span></div>
+          <div class="camera-wrap monitor-image"><img id="dashSegStream" src="/stream.mjpg?view=segmentation" alt="Semantic segmentation"><span class="camera-tag top-left">SEGMENTATION</span><span class="camera-tag bottom-left" id="segHumanOverlay">NO PERSON DETECTED</span></div>
+        </article>
+        <article class="panel monitor-card">
+          <div class="panel-head"><div><span class="overline">PATH PLANNER</span><h2>A* Route</h2></div><span class="status-pill small"><i></i><span id="dashNavStatus">WAITING</span></span></div>
+          <div class="camera-wrap monitor-image"><img id="dashAstarStream" src="/stream.mjpg?view=astar" alt="A star route"><span class="camera-tag top-left">A* ROUTE</span><span class="camera-tag bottom-right" id="dashPathOverlay">WAITING</span></div>
+          <div class="mini-stats"><span>PATH <b id="dashPathStatus">WAITING</b></span><span>NODES <b id="dashDistance">—</b></span><span>COMMAND <b id="dashCommand2">STOP</b></span></div>
+        </article>
+      </div>
+
+      <div class="lower-grid">
+        <article class="panel human-panel">
+          <div class="panel-head"><div><span class="overline">SAFETY PERCEPTION</span><h2>Human Detection</h2></div><span class="clear-badge" id="humanChip">CLEAR</span></div>
+          <div class="human-main"><div class="human-symbol">◎</div><div><strong id="humanTitle">No person detected</strong><p id="humanDetail">YOLOv8 person detection is monitoring the active source.</p></div></div>
+          <div class="two-metrics"><div><span>PEOPLE</span><strong id="humanCount">0</strong></div><div><span>MAX CONFIDENCE</span><strong id="humanConfidence">--</strong></div></div>
+        </article>
+
+        <article class="panel system-panel">
+          <div class="panel-head"><div><span class="overline">SYSTEM HEALTH</span><h2>Subsystem Status</h2></div><span class="clear-badge">LIVE</span></div>
+          <div class="health-list">
+            <div><span>Camera</span><b id="healthCamera">Offline</b></div>
+            <div><span>AI Perception</span><b id="healthPerception">Waiting</b></div>
+            <div><span>A* Planner</span><b id="healthPlanner">Waiting</b></div>
+            <div><span>Motor Controller</span><b id="healthMotor">Ready</b></div>
+          </div>
+        </article>
+
+        <article class="panel mission-panel">
+          <div class="panel-head"><div><span class="overline">MISSION STATUS</span><h2>Autonomous Run</h2></div><span class="status-pill small"><i></i> MONITORING</span></div>
+          <div class="mission-grid">
+            <div><span>PLANNER</span><strong id="missionPlanner">WAITING</strong></div>
+            <div><span>PATH NODES</span><strong id="missionNodes">—</strong></div>
+            <div><span>COMMAND</span><strong id="missionCommand">STOP</strong></div>
+            <div><span>SOURCE</span><strong id="missionSource">CAMERA</strong></div>
+          </div>
+          <button class="wide-link" id="openVOSecondary">Open Visual Odometry Window ↗</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- LOCAL MAP -->
+    <section class="page" id="page-map">
+      <div class="page-head">
+        <div><h1>Local Map</h1><p>Select a real-world area on OpenStreetMap, then view the local VO map aligned over satellite imagery.</p></div>
+        <span class="status-pill" id="mapVoStatus"><i></i> WAITING</span>
+      </div>
+
+      <div class="panel map-controls">
+        <div class="map-control-row">
+          <div class="map-search">
+            <span class="overline">LOCATION</span>
+            <div class="map-search-line">
+              <input id="mapSearch" type="search" placeholder="Search a place or address on OpenStreetMap">
+              <button id="mapSearchBtn" class="source-primary" type="button">Search</button>
+            </div>
+          </div>
+          <div class="map-actions">
+            <button id="mapSelectBtn" class="source-primary" type="button">Select area</button>
+            <button id="mapClearBtn" class="source-secondary" type="button">Clear</button>
+          </div>
+        </div>
+        <div class="map-help" id="mapHelp">Click <b>Select area</b>, then click two opposite corners on the OpenStreetMap view. The selected rectangle becomes the geographic anchor for the local map.</div>
+        <div class="map-control-row map-secondary-row">
+          <label>Local-frame heading offset
+            <input id="mapHeading" type="number" min="-180" max="180" step="1" value="0">
+            <span>°</span>
+          </label>
+          <div class="map-basemap-actions" aria-label="Basemap selector">
+      <button id="mapOsmBtn" class="map-layer-button active" type="button">OpenStreetMap</button>
+      <button id="mapSatelliteBtn" class="map-layer-button" type="button">Satellite</button>
+      <span id="mapLayerStatus" class="map-layer-status">Street map</span>
+    </div>
+          <span class="map-selection-readout" id="mapSelectionReadout">No area selected</span>
+          <button id="mapApplyBtn" class="source-primary" type="button" disabled>Apply overlay</button>
+        </div>
+      </div>
+
+      <div class="panel geographic-map-panel">
+        <div class="panel-head">
+          <div><span class="overline">WORLD MAP</span><h2>Geographic Local Map</h2></div>
+          <span class="map-overlay-status" id="mapOverlayStatus">● Waiting for geographic anchor</span>
+        </div>
+        <div id="geographicMap" class="geographic-map" aria-label="Interactive OpenStreetMap and satellite map"></div>
+      </div>
+
+      <div class="metric-row">
+        <article class="metric-card"><span>POSE X</span><strong id="mapPoseX">—</strong><small>local metres</small></article>
+        <article class="metric-card"><span>POSE Y</span><strong id="mapPoseY">—</strong><small>local metres</small></article>
+        <article class="metric-card"><span>YAW</span><strong id="mapYaw">—</strong><small>degrees</small></article>
+        <article class="metric-card"><span>COVERAGE</span><strong id="mapCoverage">—</strong><small>m²</small></article>
+        <article class="metric-card"><span>WAYPOINT</span><strong id="mapWaypoint">—/—</strong><small>mission</small></article>
+      </div>
+
+      <div class="monitor-grid" style="grid-template-columns:1fr 1fr;">
+        <article class="panel monitor-card" style="grid-column:1/2;">
+          <div class="panel-head"><div><span class="overline">SATELLITE OVERLAY</span><h2>Visual Odometry Map</h2></div><span class="live-badge"><i></i> LIVE</span></div>
+          <div style="padding:.55rem 1rem;border-bottom:1px solid #e5e7eb;"><span id="mapVoStatus" class="map-overlay-status warn">● VO WAITING FOR MOTION</span></div>
+          <div id="localVoMap" class="local-vo-map" aria-label="Satellite map with visual odometry trajectory"><span class="camera-tag top-left">SATELLITE · VO TRAJECTORY</span></div>
+        </article>
+        <article class="panel" style="grid-column:2/3;padding:1.5rem;">
+          <span class="overline">ROUTE SEGMENTS</span>
+          <h2>Segment Status</h2>
+          <div id="mapSegments" style="margin-top:1rem;"><p style="color:#888">No route loaded.</p></div>
+          <span class="overline" style="margin-top:1.5rem;display:block;">SURVIVORS</span>
+          <h2>Detected Persons</h2>
+          <div id="mapSurvivors" style="margin-top:1rem;"><p style="color:#888">None confirmed (need 3+ detections).</p></div>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="stopModal" hidden><div class="stop-modal"><div class="stop-sign">STOP</div><h2>Confirm emergency stop</h2><p>This immediately halts autonomous motion and disables motor output. Sensor streams remain active.</p><div><button id="cancelStop" class="cancel-button">Cancel</button><button id="confirmStop" class="confirm-stop">Stop rover now</button></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/app.js?v=13"></script>
+</body>
+</html>

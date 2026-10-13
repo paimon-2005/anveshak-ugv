@@ -1,0 +1,26 @@
+{
+  "format": "BiSeNetV2 inference state_dict",
+  "classes": 4,
+  "traversable_class_id": 1,
+  "requires_output_aux": false,
+  "original_checkpoint_bytes": 39936486,
+  "checkpoint_bytes": 14576229,
+  "original_sha256": "2b2207ca92ad6cca8ad04a07a02ce7995d602cfa82696433438216480087e571",
+  "sha256": "1395f9d18378559d699304397e6bb43cc9dbd71c4ca2e373c05964c668d0f8c4",
+  "removed_auxiliary_tensor_elements": 6329992,
+  "remaining_tensor_elements": 3618934,
+  "retained_weights_modified": false,
+  "normalization": {
+    "mean": [
+      0.3257,
+      0.369,
+      0.3223
+    ],
+    "std": [
+      0.2112,
+      0.2148,
+      0.2115
+    ]
+  },
+  "floor_fraction": 0.45
+}

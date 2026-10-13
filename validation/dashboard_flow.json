@@ -1,0 +1,8 @@
+{
+  "three_mjpeg_views": true,
+  "upload_switches_source": true,
+  "video_eof_keeps_dashboard_online": true,
+  "return_to_configured_source": true,
+  "standalone_vo_button_launches_external_process": true,
+  "live_vo_uses_raw_dashboard_mirror": true
+}
