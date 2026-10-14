@@ -2,7 +2,7 @@
 
 Vision-based autonomous navigation for an Unmanned Ground Vehicle (UGV) in GPS-denied environments. It watches the world through a single camera, figures out where it can drive, plans a path, and steers an ESP32-controlled rover, all while you watch live on a web dashboard.
 
-Built by **Team LuminaForge** (SIH 2026, PS 26126).
+
 
 ## What it does
 
